@@ -58,17 +58,13 @@ start_command() {
 # ## Reading the .env file
 
 # The .env file needs to be a list of assignments like in a shell script.
-# Only lines containing an equal sign are read, which means you can add comments.
-# Preferably shell-style comments so that your editor print them like shell scripts.
+# The file is interpreted as a bash script and all asignments are exported
+# automatically (set -a)
 
 ENV_FILE=${2:-'.env'}
-if [ -f $ENV_FILE ]; then
-  while read line || [ -n "$line" ]; do
-    if [[ "$line" != \#* && "$line" == *=* ]]; then
-      eval "export $line"
-    fi
-  done < "$ENV_FILE"
-fi
+set -a
+source $ENV_FILE || true
+set +a
 
 # ## Reading the Procfile
 
