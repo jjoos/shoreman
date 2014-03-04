@@ -1,7 +1,7 @@
 describe "Shoreman"
 
 it_displays_usage() {
-  usage=$(bash ./shoreman.sh --help | head -n1)
+  usage=$(bash ./shoreman.sh -h | head -n1)
   test "$usage" = "Usage: shoreman [<procfile>]"
 }
 
@@ -23,6 +23,11 @@ it_supports_dot_env_file() {
 
 it_can_pass_env_file_as_second_argument() {
   output=$(bash ./shoreman.sh 'test/fixtures/env_file_arg_procfile' 'test/fixtures/env_file_arg' | head -n1)
+  test "$output" = "MUZ = bar"
+}
+
+it_can_pass_env_file_as_e_argument() {
+  output=$(bash ./shoreman.sh -e 'test/fixtures/env_file_arg' 'test/fixtures/env_file_arg_procfile' | head -n1)
   test "$output" = "MUZ = bar"
 }
 

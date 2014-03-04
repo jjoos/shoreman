@@ -19,12 +19,33 @@ usage() {
   echo "processes that it describes."
 }
 
-# If the --help option is given, show the usage message and exit.
-expr -- "$*" : ".*--help" >/dev/null && {
-  usage
-  exit 0
-}
+ENV_FILE='.env'
+PROCFILE='Procfile'
 
+# ## Read command line options
+
+# We want to have a structured method to read command line arguments, we use
+# getopt without the -l flag, since this breaks osx compatability.
+read_command_line_options() {
+  # read the options
+  eval set -- "`getopt -o e:h -- $*`"
+
+  # extract options and their arguments into variables.
+  while true ; do
+    case "$1" in
+      -e)
+        case "$2" in
+            "") shift 2 ;;
+            *) ENV_FILE=$2 ; shift 2 ;;
+        esac ;;
+      -h) usage ; exit 0 ;;
+      --) shift ; break ;;
+    esac
+  done
+
+  if [[ $1 != '' ]]; then PROCFILE="$1"; fi
+  if [[ $2 != '' ]]; then ENV_FILE="$2"; fi
+}
 # ## Logging
 
 # For logging we want to prefix each entry with the current time, as well
@@ -55,13 +76,13 @@ start_command() {
   store_pid "$pid"
 }
 
+read_command_line_options "$@"
+
 # ## Reading the .env file
 
 # The .env file needs to be a list of assignments like in a shell script.
 # The file is interpreted as a bash script and all asignments are exported
 # automatically (set -a)
-
-ENV_FILE=${2:-'.env'}
 set -a
 source $ENV_FILE || true
 set +a
@@ -70,7 +91,6 @@ set +a
 
 # The Procfile needs to be parsed to extract the process names and commands.
 # The file is given on stdin, see the `<` at the end of this while loop.
-PROCFILE=${1:-'Procfile'}
 while read line || [ -n "$line" ]; do
   name=${line%%:*}
   command=${line#*: }
