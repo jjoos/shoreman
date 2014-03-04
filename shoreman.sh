@@ -8,6 +8,10 @@
 # Make sure that any errors cause the script to exit immediately.
 set -e
 
+# default values
+DEFAULT_ENV_FILE="./.env"
+DEFAULT_PROCFILE="./Procfile"
+
 # ## Usage
 
 # Usage message that is displayed when `--help` is given as an argument.
@@ -61,7 +65,7 @@ start_command() {
 # Only lines containing an equal sign are read, which means you can add comments.
 # Preferably shell-style comments so that your editor print them like shell scripts.
 
-ENV_FILE=${2:-'.env'}
+ENV_FILE=${2:-$DEFAULT_ENV_FILE}
 if [ -f $ENV_FILE ]; then
   while read line || [ -n "$line" ]; do
     if [[ "$line" != \#* && "$line" == *=* ]]; then
@@ -74,7 +78,7 @@ fi
 
 # The Procfile needs to be parsed to extract the process names and commands.
 # The file is given on stdin, see the `<` at the end of this while loop.
-PROCFILE=${1:-'Procfile'}
+PROCFILE=${1:-$DEFAULT_PROCFILE}
 while read line || [ -n "$line" ]; do
   name=${line%%:*}
   command=${line#*: }
